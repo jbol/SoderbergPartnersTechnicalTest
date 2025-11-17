@@ -15,7 +15,7 @@ test("Flow 1: Registration, update contact info, update profile, logout", async 
   await page.getByTestId("customer.address.zipCode").fill("90210");
   await page.getByTestId("customer.phoneNumber").fill("555-0100");
   await page.getByTestId("customer.ssn").fill("123-45-6789");
-  await page.getByTestId("customer.username").fill("testuser1");
+  await page.getByTestId("customer.username").fill("testuse6");
   await page.locator('input[id="customer.password"]').fill("Passw0rd!123");
   await page.locator('input[id="repeatedPassword"]').fill("Passw0rd!123");
 
@@ -38,7 +38,6 @@ test("Flow 1: Registration, update contact info, update profile, logout", async 
 
   await page.getByTestId("customer.phoneNumber").fill("555-0200");
   await Promise.all([
-    page.waitForNavigation().catch(() => {}),
     page.getByRole("button", { name: /update/i }).click()
   ]);
 
@@ -50,7 +49,7 @@ test("Flow 1: Registration, update contact info, update profile, logout", async 
 });
 
 test("Flow 2: Login with existing user and visual snapshots", async ({ page }) => {
-  await page.locator('input[name="username"]').fill("testuser1");
+  await page.locator('input[name="username"]').fill("testuser6");
   await page.locator('input[name="password"]').fill("Passw0rd!123");
   await Promise.all([
     page.waitForNavigation(),
