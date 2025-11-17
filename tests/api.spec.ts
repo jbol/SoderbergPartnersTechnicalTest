@@ -182,3 +182,26 @@ test.describe("Scenario 5: Delayed response handling", () => {
     expect(duration1).toBeLessThan(duration2);
   });
 });
+
+test.describe("Scenario 6: Chained requests - list then detail", () => {
+  test("fetch list, pick a user, fetch details and validate", async ({ request }) => {
+    const listRes = await request.get(`${BASE}/api/users?page=1`, { headers });
+    expect(listRes.status()).toBe(200);
+    const listBody = await listRes.json();
+    expect(Array.isArray(listBody.data)).toBeTruthy();
+    expect(listBody.data.length).toBeGreaterThan(0);
+
+    const userFromList = listBody.data[0];
+    const id = userFromList.id;
+
+    const detailRes = await request.get(`${BASE}/api/users/${id}`, { headers });
+    expect(detailRes.status()).toBe(200);
+    const detailBody = await detailRes.json();
+    const userDetail = detailBody.data;
+
+    expect(userDetail.id).toBe(id);
+    expect(userDetail.email).toBe(userFromList.email);
+    expect(userDetail.first_name).toBe(userFromList.first_name);
+    expect(userDetail.last_name).toBe(userFromList.last_name);
+  });
+});
