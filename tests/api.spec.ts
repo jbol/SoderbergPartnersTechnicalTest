@@ -123,3 +123,34 @@ test.describe("Scenario 3: Create user endpoint", () => {
     expect(body).toHaveProperty("id");
   });
 });
+
+test.describe("Scenario 4: Pagination handling", () => {
+  test("GET /api/users?page=2 - returns correct paginated data", async ({ request }) => {
+    const res = await request.get(`${BASE}/api/users?page=2`, { headers });
+
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+
+    expect(body).toHaveProperty("page");
+    expect(body).toHaveProperty("per_page");
+    expect(body).toHaveProperty("total");
+    expect(body).toHaveProperty("total_pages");
+    expect(body).toHaveProperty("data");
+
+    expect(body.page).toBe(2);
+    expect(body.data.length).toBe(body.per_page);
+  });
+
+  test("GET /api/users - page 1 and page 2 return unique users", async ({ request }) => {
+    const res1 = await request.get(`${BASE}/api/users?page=1`, { headers });
+    const body1 = await res1.json();
+    const page1Users = body1.data.map((user: any) => user.id);
+
+    const res2 = await request.get(`${BASE}/api/users?page=2`, { headers });
+    const body2 = await res2.json();
+    const page2Users = body2.data.map((user: any) => user.id);
+
+    const commonUsers = page1Users.filter((id: number) => page2Users.includes(id));
+    expect(commonUsers.length).toBe(0);
+  });
+});
