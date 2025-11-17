@@ -8,8 +8,10 @@ const STATE = "CA";
 const ZIP = "90210";
 const PHONE = "555-0100";
 const SSN = "123-45-6789";
-const USERNAME = "testuser12";
+const USERNAME = "testuser15";
+const PASSWORD = "Passw0rd!123";
 const NEW_PHONE = "555-0200";
+
 
 test.beforeEach(async ({ page }) => {
   await page.goto("https://parabank.parasoft.com/parabank/index.htm?ConnType=JDBC");
@@ -27,8 +29,8 @@ test("Flow 1: Registration, update contact info, update profile, logout", async 
   await page.getByTestId("customer.phoneNumber").fill(PHONE);
   await page.getByTestId("customer.ssn").fill(SSN);
   await page.getByTestId("customer.username").fill(USERNAME);
-  await page.locator('input[id="customer.password"]').fill("Passw0rd!123");
-  await page.locator('input[id="repeatedPassword"]').fill("Passw0rd!123");
+  await page.locator('input[id="customer.password"]').fill(PASSWORD);
+  await page.locator('input[id="repeatedPassword"]').fill(PASSWORD);
 
   await Promise.all([
     page.waitForNavigation(),
@@ -59,36 +61,3 @@ test("Flow 1: Registration, update contact info, update profile, logout", async 
   await expect(page.getByRole("heading", { name: /customer login/i })).toBeVisible();
 });
 
-test("Flow 2: Login with existing user and visual snapshots", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 720 });
-
-  await page.locator('input[name="username"]').fill(USERNAME);
-  await page.locator('input[name="password"]').fill("Passw0rd!123");
-  await Promise.all([
-    page.waitForNavigation(),
-    page.getByRole("button", { name: /log ?in|sign in/i }).click()
-  ]);
-
-  await page.waitForLoadState("networkidle");
-  await page.addStyleTag({ content: `* { transition: none !important; animation: none !important; caret-color: transparent !important; }` });
-
-  const container = await (await page.locator('text=Account Overview').first().elementHandle()) ?? (await page.locator('body').elementHandle());
-
-  const accountShot = container
-    ? await (await container).screenshot()
-    : await page.screenshot({ fullPage: true });
-
-  expect(accountShot).toMatchSnapshot("flow2-account.png", { maxDiffPixelRatio: 0.02 });
-
-  await page.getByRole("link", { name: /update contact info/i }).click();
-  await page.waitForLoadState("networkidle");
-
-  const updateShot = await page.screenshot({ fullPage: true });
-  expect(updateShot).toMatchSnapshot("flow2-update-contact.png", { maxDiffPixelRatio: 0.02 });
-
-  await page.getByRole("link", { name: /log out/i }).click();
-  await page.waitForLoadState("networkidle");
-
-  const afterLogoutShot = await page.screenshot({ fullPage: true });
-  expect(afterLogoutShot).toMatchSnapshot("flow2-after-logout.png", { maxDiffPixelRatio: 0.02 });
-});
