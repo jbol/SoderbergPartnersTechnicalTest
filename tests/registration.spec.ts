@@ -48,3 +48,21 @@ test("Flow 1: Registration, update contact info, update profile, logout", async 
   await page.getByRole("link", { name: /log out/i }).click();
   await expect(page.getByRole("heading", { name: /customer login/i })).toBeVisible();
 });
+
+test("Flow 2: Login with existing user and visual snapshots", async ({ page }) => {
+  await page.locator('input[name="username"]').fill("testuser1");
+  await page.locator('input[name="password"]').fill("Passw0rd!123");
+  await Promise.all([
+    page.waitForNavigation(),
+    page.getByRole("button", { name: /log ?in|sign in/i }).click()
+  ]);
+
+  await expect(page.getByRole("link", { name: /log out/i })).toBeVisible();
+  expect(await page.screenshot({ fullPage: true })).toMatchSnapshot("flow2-account.png");
+
+  await page.getByRole("link", { name: /update contact info/i }).click();
+  expect(await page.screenshot({ fullPage: true })).toMatchSnapshot("flow2-update-contact.png");
+
+  await page.getByRole("link", { name: /log out/i }).click();
+  expect(await page.screenshot({ fullPage: true })).toMatchSnapshot("flow2-after-logout.png");
+});
