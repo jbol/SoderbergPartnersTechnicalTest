@@ -7,7 +7,7 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-test.describe("Authentication scenarios", () => {
+test.describe("Scenario 1: Authentication scenarios", () => {
   test("POST /api/login - successful login with valid credentials", async ({ request }) => {
     const res = await request.post(`${BASE}/api/login`, {
       headers,
@@ -58,7 +58,7 @@ test.describe("Authentication scenarios", () => {
   });
 });
 
-test.describe("User details endpoint", () => {
+test.describe("Scenario 2: User details endpoint", () => {
   test("GET /api/users/2 - returns specific user details", async ({ request }) => {
     const res = await request.get(`${BASE}/api/users/2`, { headers });
 
@@ -75,5 +75,51 @@ test.describe("User details endpoint", () => {
   test("GET /api/users/2 - non-existent user returns 404", async ({ request }) => {
     const res = await request.get(`${BASE}/api/users/999`, { headers });
     expect(res.status()).toBe(404);
+  });
+});
+
+test.describe("Scenario 3: Create user endpoint", () => {
+  test("POST /api/users - create user with valid name and job", async ({ request }) => {
+    const res = await request.post(`${BASE}/api/users`, {
+      headers,
+      data: {
+        name: "John",
+        job: "developer",
+      },
+    });
+
+    expect(res.status()).toBe(201);
+    const body = await res.json();
+    
+    expect(body).toHaveProperty("id");
+    expect(body.name).toBe("John");
+    expect(body.job).toBe("developer");
+    expect(body).toHaveProperty("createdAt");
+  });
+
+    test("POST /api/users - missing name field still creates user", async ({ request }) => {
+    const res = await request.post(`${BASE}/api/users`, {
+      headers,
+      data: {
+        job: "developer",
+      },
+    });
+
+    expect(res.status()).toBe(201);
+    const body = await res.json();
+    expect(body).toHaveProperty("id");
+  });
+
+  test("POST /api/users - missing job field still creates user", async ({ request }) => {
+    const res = await request.post(`${BASE}/api/users`, {
+      headers,
+      data: {
+        name: "John",
+      },
+    });
+
+    expect(res.status()).toBe(201);
+    const body = await res.json();
+    expect(body).toHaveProperty("id");
   });
 });
