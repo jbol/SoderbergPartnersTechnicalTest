@@ -154,3 +154,31 @@ test.describe("Scenario 4: Pagination handling", () => {
     expect(commonUsers.length).toBe(0);
   });
 });
+
+test.describe("Scenario 5: Delayed response handling", () => {
+  test("GET /api/users?delay=3 - returns data within expected timeframe", async ({ request }) => {
+    const startTime = Date.now();
+    const res = await request.get(`${BASE}/api/users?delay=3`, { headers });
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    expect(body).toHaveProperty("data");
+    expect(body.data.length).toBeGreaterThan(0);
+
+    expect(duration).toBeGreaterThanOrEqual(3000);
+  });
+
+  test("GET /api/users?delay=1 - responds faster than delay=3", async ({ request }) => {
+    const startTime1 = Date.now();
+    await request.get(`${BASE}/api/users?delay=1`, { headers });
+    const duration1 = Date.now() - startTime1;
+
+    const startTime2 = Date.now();
+    await request.get(`${BASE}/api/users?delay=3`, { headers });
+    const duration2 = Date.now() - startTime2;
+
+    expect(duration1).toBeLessThan(duration2);
+  });
+});
